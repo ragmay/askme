@@ -5,8 +5,20 @@ class User < ApplicationRecord
 
   has_many :questions
 
+  before_validation :username_downcase
+
+  def username_downcase
+    username.downcase!
+  end
+
+  validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }
+  validates :username, length: { maximum: 40 }
   validates :email, :username, presence: true
   validates :email, :username, uniqueness: true
+
+  validates_each :username do |record, attr, value|
+    record.errors.add(attr, "can only contain Latin letters, numbers, and _") if value !~ /^[a-z0-9_]{1,}$/i
+  end
 
   attr_accessor :password
 
